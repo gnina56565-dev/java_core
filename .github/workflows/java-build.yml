@@ -1,32 +1,31 @@
-name: Java CI  # Название вашего workflow
+name: Java Build and Run
 
-on:  # Определяет, когда будет запускаться workflow
+on:
   push:
-    branches: [ main, feature/* ]  # При push в ветку main или любую feature-ветку
+    branches: [ "main", "feature/*" ]
   pull_request:
-    branches: [ main ]  # При создании PR в main
+    branches: [ "main" ]
 
-jobs:  # Задачи, которые будут выполняться
-  build:  # Название задачи
-    runs-on: ubuntu-latest  # На какой ОС будет выполняться (исправил alpine на ubuntu)
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
 
-    steps:  # Шаги выполнения
-      - uses: actions/checkout@v3  # Клонирование репозитория
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 21  # Установка Java 21
-        uses: actions/setup-java@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Prepare  # Подготовка Предоставление прав на выполнение
-        run: chmod +x gradlew
+      - name: Compile Main.java
+        run: |
+          mkdir -p build
+          javac -d build src/ru/mentee/power/variables/Main.java
 
-      - name: Build without tests  # Сборка проекта без тестов
-        run: ./gradlew clean build -x test
-
-      - name: Run tests  # Запуск тестов
-        run: ./gradlew test
-
-      - name: Clean and build  # Очистка и полная сборка проекта
-        run: ./gradlew clean build
+      - name: Run Main.class
+        run: |
+          cd build
+          java ru.mentee.power.variables.Main
